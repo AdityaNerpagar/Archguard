@@ -1,0 +1,28 @@
+{
+  "name": "archguard",
+  "version": "0.1.0",
+  "description": "Check that code matches its LikeC4 architecture model",
+  "scripts": {
+    "build": "tsc",
+    "check": "node dist/cli.js check",
+    "test": "node --test test/*.test.mjs"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "dependency-cruiser": "^16.10.4",
+    "likec4": "^1.59.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  },
+  "type": "module",
+  "bin": {
+    "archguard": "./dist/cli.js"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  }
+}

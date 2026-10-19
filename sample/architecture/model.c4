@@ -1,0 +1,44 @@
+// Relationships are the ALLOWED dependencies.
+// Anything not drawn here is not allowed.
+
+specification {
+  element system
+  element container
+}
+
+model {
+  shop = system 'Shop' {
+    description 'A small online shop'
+
+    web = container 'Web app' {
+      description 'Pages the customer sees'
+      metadata {
+        code 'src/web'
+      }
+    }
+
+    orders = container 'Orders' {
+      description 'Places and tracks orders'
+      metadata {
+        code 'src/orders'
+      }
+    }
+
+    db = container 'Database access' {
+      description 'Reads and writes stored data'
+      metadata {
+        code 'src/db'
+      }
+    }
+
+    web -> orders 'places orders through'
+    orders -> db 'stores orders in'
+  }
+}
+
+views {
+  view index {
+    title 'Shop'
+    include shop, shop.*
+  }
+}
