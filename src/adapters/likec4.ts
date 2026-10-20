@@ -20,11 +20,15 @@ export async function readLikeC4(workspaceDir: string): Promise<ArchModel> {
   for (const el of model.elements()) {
     const metadata = el.getMetadata() as Record<string, unknown>
     const code = metadata['code']
+    const service = metadata['service']
+    const services = (Array.isArray(service) ? service : typeof service === 'string' ? service.split(',') : [])
+      .map(s => String(s).trim()).filter(Boolean)
     components.push({
       id: el.id,
       title: el.title,
       codePath: typeof code === 'string' && code.trim() !== '' ? normalize(code) : undefined,
       parent: el.parent?.id,
+      ...(services.length > 0 ? { services } : {}),
     })
   }
 

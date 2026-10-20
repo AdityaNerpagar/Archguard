@@ -11,6 +11,8 @@ export interface Component {
   codePath?: string
   /** Parent component id, if nested */
   parent?: string
+  /** Deployed service names (docker-compose / Kubernetes) that run this component, from "service" metadata */
+  services?: string[]
 }
 
 export interface AllowedDependency {
@@ -37,8 +39,22 @@ export interface Violation {
   imports: CodeDependency[]
 }
 
+/** A network connection between services that the model doesn't allow. */
+export interface NetworkViolation {
+  from: Component
+  to: Component
+  connections: { fromService: string; toService: string; evidence: string }[]
+}
+
 export interface CheckResult {
   violations: Violation[]
+  networkViolations: NetworkViolation[]
+  /** Services found in deployment configs that match no element */
+  unmappedServices: { name: string; file: string }[]
+  /** Service name -> element id, for the ones that matched */
+  serviceMapping: Record<string, string>
+  /** Deployment config files that were read */
+  deployFiles: string[]
   /** Components with no "code" metadata */
   unmappedComponents: Component[]
   /** Components whose "code" folder doesn't exist */

@@ -1,0 +1,19 @@
+services:
+  shop:
+    build: .
+    environment:
+      DATABASE_URL: postgres://shop:secret@postgres:5432/shop
+      PAYMENTS_URL: http://payments-mock:8080
+      # Not in the architecture: imports can't see this call, only the config shows it.
+      ANALYTICS_URL: http://analytics:9000/events
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:17
+
+  payments-mock:
+    image: wiremock/wiremock:3
+
+  analytics:
+    image: example/analytics:1

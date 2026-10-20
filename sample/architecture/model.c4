@@ -9,6 +9,9 @@ specification {
 model {
   shop = system 'Shop' {
     description 'A small online shop'
+    metadata {
+      service 'shop'
+    }
 
     web = container 'Web app' {
       description 'Pages the customer sees'
@@ -34,11 +37,32 @@ model {
     web -> orders 'places orders through'
     orders -> db 'stores orders in'
   }
+
+  database = system 'Postgres database' {
+    description 'Stores orders'
+    metadata {
+      service 'postgres'
+    }
+  }
+
+  payments = system 'Payments provider' {
+    description 'Charges cards (a mock in development)'
+    metadata {
+      service 'payments-mock'
+    }
+  }
+
+  analytics = system 'Analytics' {
+    description 'Collects usage events'
+  }
+
+  shop.db -> database 'reads and writes'
+  shop.orders -> payments 'charges cards through'
 }
 
 views {
   view index {
     title 'Shop'
-    include shop, shop.*
+    include shop, shop.*, database, payments, analytics
   }
 }
