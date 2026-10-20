@@ -106,22 +106,35 @@ in the `.c4` files. When the team agrees, change `status 'draft'` to `'approved'
 
 ## 3. Check
 
-`archguard check` checks two things:
+`archguard check` is the fast, pass/fail gate: no Emerge, nothing written to disk, just
+an exit code. It checks two things directly against the model:
 
-- **Imports** between code folders (JavaScript/TypeScript, via dependency-cruiser).
-- **Network connections** between services, which imports can't show. It reads
-  `docker-compose*.yml` / `compose*.yml` and Kubernetes manifests anywhere in the project,
-  and finds connections from `depends_on`, `links`, and connection strings in environment
-  variables and ConfigMaps that name another service (`postgres://db:5432`,
-  `http://payments:8080`, `kafka:9092`, Kubernetes Service names). Helm templates are
-  skipped, since they aren't valid YAML until rendered. `--no-network` turns this off.
+- **Imports** between code folders (JavaScript/TypeScript, via dependency-cruiser). This
+  is how in-process access shows up, including a service reading its own database
+  through an ORM or driver import — it's a file-to-file import like any other, checked
+  against the `code` folders in the model.
+- **Network connections** between services, which imports can't show — the case where
+  one service calls another (or a database) *over the wire*, as a separate deployed
+  process. It reads `docker-compose*.yml` / `compose*.yml` and Kubernetes manifests
+  anywhere in the project, and finds connections from `depends_on`, `links`, and
+  connection strings in environment variables and ConfigMaps that name another service
+  (`postgres://db:5432`, `http://payments:8080`, `kafka:9092`, Kubernetes Service names).
+  Helm templates are skipped, since they aren't valid YAML until rendered. `--no-network`
+  turns this off.
+
+So "the database" isn't a special case: if it's imported as code, it's an import
+violation; if it's a separate container/pod your service talks to on the network, it's a
+network violation, found the same way any other service-to-service call is.
 
 Exit codes: `0` everything matches, `1` violations found, `2` the check couldn't run.
 
 ## 4. See the architecture as it really is
 
-`archguard actual` runs Emerge on the mapped folders and translates its results into
-your model's elements:
+While `check` only tells you pass/fail, `archguard actual` is the exploratory,
+visual counterpart: it runs Emerge on the mapped folders to build a full dependency
+graph of the code (the same import relationships `check` validates, but as a diagram
+you can browse), reuses the same deployment-config scan for network connections, and
+translates both into your model's elements:
 
 ```
 Dependencies between elements, as the code really is:
